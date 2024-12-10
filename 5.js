@@ -80,15 +80,20 @@ Determine which updates are already in the correct order. What do you get if you
 */
 
 const handler = require("./utils");
+const file = "./data/5.txt";
 
 const partOne = () => {
-  const ordering = [];
+  const updates = [];
   const rules = [];
   let total = 0;
-  handler.handleFile("./data/5.txt", (line) => {
-    console.log(line);
+  handler.handleFile(file, (line) => {
+    if (line.includes("|")) {
+      rules.push(line);
+    } else {
+      updates.push(line);
+    }
   });
-  console.table([{ total }]);
+  console.table([{ rules, updates, total }]);
 };
 
 const partTwo = () => {};

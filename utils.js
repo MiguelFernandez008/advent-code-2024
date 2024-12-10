@@ -1,4 +1,4 @@
-var fs = require("fs");
+const fs = require("fs");
 
 module.exports.handleFile = (file, callback) => {
   const data = fs.readFileSync(file, "utf-8");
