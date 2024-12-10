@@ -58,12 +58,11 @@ Thanks to the Problem Dampener, 4 reports are actually safe!
 Update your analysis by handling situations where the Problem Dampener can remove a single level from unsafe reports. How many reports are now safe?
 */
 
-var fs = require("fs");
-const data = fs.readFileSync("./data/2.txt", "utf-8");
+const handler = require("./utils");
 
 const partOne = () => {
   let safeReports = 0;
-  data.split(/\r?\n/).forEach((line, lineIndex) => {
+  handler.handleFile("./data/2.txt", (line) => {
     const numbers = line.split(" ");
     let isSafe = true;
     let ascending = false;
@@ -166,7 +165,7 @@ const partTwoChecker = (numbers) => {
 
 const partTwo = () => {
   let safeReports = 0;
-  data.split(/\r?\n/).forEach((line) => {
+  handler.handleFile("./data/2.txt", (line) => {
     if (line.trim() !== "") {
       const numbers = line.split(" ");
       let isSafe = partTwoChecker(numbers);
@@ -178,8 +177,7 @@ const partTwo = () => {
             break;
           }
         }
-      }
-      else {
+      } else {
         safeReports++;
       }
     }
@@ -189,4 +187,3 @@ const partTwo = () => {
 
 partOne();
 partTwo();
-fs.close(2);

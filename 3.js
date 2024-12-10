@@ -43,20 +43,17 @@ Handle the new instructions; what do you get if you add up all of the results of
 
 */
 
-var fs = require("fs");
-const data = fs.readFileSync("./data/3.txt", "utf-8");
+const handler = require("./utils");
 
 const partOne = () => {
   let total = 0;
-  data.split(/\r?\n/).forEach((line) => {
-    if (line.trim() !== "") {
-      const results = [...line.matchAll(/mul\([0-9]+\,[0-9]+\)/g)];
-      for (let index = 0; index < results.length; index++) {
-        const [item, ,] = results[index];
-        const parsedItem = item.replace("mul(", "").replace(")", "");
-        const [firstNumber, secondNumber] = parsedItem.split(",");
-        total += parseInt(firstNumber) * parseInt(secondNumber);
-      }
+  handler.handleFile("./data/3.txt", (line) => {
+    const results = [...line.matchAll(/mul\([0-9]+\,[0-9]+\)/g)];
+    for (let index = 0; index < results.length; index++) {
+      const [item, ,] = results[index];
+      const parsedItem = item.replace("mul(", "").replace(")", "");
+      const [firstNumber, secondNumber] = parsedItem.split(",");
+      total += parseInt(firstNumber) * parseInt(secondNumber);
     }
   });
   console.log(`Total: ${total}`);
@@ -65,35 +62,31 @@ const partTwo = () => {
   let total = 0;
   // At the beginning of the program, mul instructions are enabled
   let canOperate = true;
-  data.split(/\r?\n/).forEach((line, lineIndex) => {
-    if (line.trim() !== "") {
-      const linesOnlyDo = [];
-      const items = line.split("do");
-      for (let index = 0; index < items.length; index++) {
-        const item = items[index];
-        if (
-          item.charAt(0) === "n" &&
-          item.charAt(1) === "'" &&
-          item.charAt(2) === "t"
-        ) {
-          canOperate = false;
-        }
-        if (item.charAt(0) === "(") {
-          canOperate = true;
-        }
-        if (canOperate) {
-          linesOnlyDo.push(item);
-        }
+  handler.handleFile("./data/3.txt", (line) => {
+    const linesOnlyDo = [];
+    const items = line.split("do");
+    for (let index = 0; index < items.length; index++) {
+      const item = items[index];
+      if (
+        item.charAt(0) === "n" &&
+        item.charAt(1) === "'" &&
+        item.charAt(2) === "t"
+      ) {
+        canOperate = false;
       }
-      const results = [
-        ...linesOnlyDo.join().matchAll(/mul\([0-9]+\,[0-9]+\)/g),
-      ];
-      for (let index = 0; index < results.length; index++) {
-        const [item, ,] = results[index];
-        const parsedItem = item.replace("mul(", "").replace(")", "");
-        const [firstNumber, secondNumber] = parsedItem.split(",");
-        total += parseInt(firstNumber) * parseInt(secondNumber);
+      if (item.charAt(0) === "(") {
+        canOperate = true;
       }
+      if (canOperate) {
+        linesOnlyDo.push(item);
+      }
+    }
+    const results = [...linesOnlyDo.join().matchAll(/mul\([0-9]+\,[0-9]+\)/g)];
+    for (let index = 0; index < results.length; index++) {
+      const [item, ,] = results[index];
+      const parsedItem = item.replace("mul(", "").replace(")", "");
+      const [firstNumber, secondNumber] = parsedItem.split(",");
+      total += parseInt(firstNumber) * parseInt(secondNumber);
     }
   });
   console.log(`Total: ${total}`);
@@ -101,4 +94,3 @@ const partTwo = () => {
 
 partOne();
 partTwo();
-fs.close(2);

@@ -74,11 +74,10 @@ So, for these example lists, the similarity score at the end of this process is 
 Once again consider your left and right lists. What is their similarity score?
 */
 
-var fs = require("fs");
-const data = fs.readFileSync("./data/1.txt", "utf-8");
+const handler = require("./utils");
 const leftList = [];
 const rightList = [];
-data.split(/\r?\n/).forEach((line) => {
+handler.handleFile("./data/1.txt", (line) => {
   const [first, second] = line.split("   ");
   leftList.push(parseInt(first));
   rightList.push(parseInt(second));
@@ -119,4 +118,3 @@ const partTwo = () => {
 
 partOne();
 partTwo();
-fs.close(2);

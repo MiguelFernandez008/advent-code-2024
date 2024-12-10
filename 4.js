@@ -70,8 +70,7 @@ In this example, an X-MAS appears 9 times.
 
 Flip the word search from the instructions back over to the word search side and try again. How many times does an X-MAS appear?
 */
-var fs = require("fs");
-const data = fs.readFileSync("./data/4.txt", "utf-8");
+const handler = require("./utils");
 
 const partOne = () => {
   //console.time('console.log performance test')
@@ -79,13 +78,11 @@ const partOne = () => {
   let totalLines = 0;
   let lineLength = 0;
   const lines = [];
-  data.split(/\r?\n/).forEach((line) => {
-    if (line.trim() !== "") {
-      const lineWithPadding = line + "Z";
-      lineLength = lineWithPadding.length;
-      totalLines += 1;
-      lines.push(lineWithPadding);
-    }
+  handler.handleFile("./data/4.txt", (line) => {
+    const lineWithPadding = line + "Z";
+    lineLength = lineWithPadding.length;
+    totalLines += 1;
+    lines.push(lineWithPadding);
   });
   const verticalDistance = lineLength - 1;
   const diagonalRightDistance = lineLength - 2;
@@ -159,18 +156,16 @@ const partTwo = () => {
   let totalLines = 0;
   let lineLength = 0;
   const lines = [];
-  data.split(/\r?\n/).forEach((line) => {
-    if (line.trim() !== "") {
-      const lineWithPadding = line + "Z";
-      lineLength = lineWithPadding.length;
-      totalLines += 1;
-      lines.push(lineWithPadding);
-    }
+  handler.handleFile("./data/4.txt", (line) => {
+    const lineWithPadding = line + "Z";
+    lineLength = lineWithPadding.length;
+    totalLines += 1;
+    lines.push(lineWithPadding);
   });
   const spacing = lineLength - 2;
   const flattedLine = lines.join().replace(/\,/g, "");
   const horizontalRegex = new RegExp(
-    `(?=M[A-Z]{1}S[A-Z]{${spacing}}A[A-Z]{${spacing}}M[A-Z]{1}S)|(?=M[A-Z]{1}M[A-Z]{${spacing}}A[A-Z]{${spacing}}S[A-Z]{1}S)|(?=S[A-Z]{1}S[A-Z]{${spacing}}A[A-Z]{${spacing}}M[A-Z]{1}M)|(?=S[A-Z]{1}M[A-Z]{${spacing}}A[A-Z]{${spacing}}S[A-Z]{1}M)`,
+    `(?=M[A-Z]S[A-Z]{${spacing}}A[A-Z]{${spacing}}M[A-Z]S)|(?=M[A-Z]M[A-Z]{${spacing}}A[A-Z]{${spacing}}S[A-Z]S)|(?=S[A-Z]S[A-Z]{${spacing}}A[A-Z]{${spacing}}M[A-Z]M)|(?=S[A-Z]M[A-Z]{${spacing}}A[A-Z]{${spacing}}S[A-Z]M)`,
     "g"
   );
   const horizontal = [...flattedLine.matchAll(horizontalRegex)];
@@ -184,4 +179,3 @@ const partTwo = () => {
 
 partOne();
 partTwo();
-fs.close(2);
