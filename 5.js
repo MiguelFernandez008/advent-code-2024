@@ -81,18 +81,22 @@ Determine which updates are already in the correct order. What do you get if you
 
 const handler = require("./utils");
 const file = "./data/5.txt";
+const separator = '|';
 
 const partOne = () => {
   const updates = [];
   const rules = [];
   let total = 0;
   handler.handleFile(file, (line) => {
-    if (line.includes("|")) {
+    if (line.includes(separator)) {      
       rules.push(line);
     } else {
       updates.push(line);
     }
   });
+  for (let index = 0; index < updates.length; index++) {
+    const update = updates[index];
+  }
   console.table([{ rules, updates, total }]);
 };
 
