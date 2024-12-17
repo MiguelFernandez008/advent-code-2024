@@ -7,7 +7,7 @@
 - Challenge 3: 184576302 /// 118173507
 - Challenge 4: 2524 /// 1873
 - Challenge 5: 
-- Challenge 6: 
+- Challenge 6: 5177
 - Challenge 7: 
 - Challenge 8: 
 - Challenge 9: 
