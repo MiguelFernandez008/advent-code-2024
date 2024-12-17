@@ -77,11 +77,41 @@ These have middle page numbers of 61, 53, and 29 respectively. Adding these page
 Of course, you'll need to be careful: the actual list of page ordering rules is bigger and more complicated than the above example.
 
 Determine which updates are already in the correct order. What do you get if you add up the middle page number from those correctly-ordered updates?
+
+--- Part Two ---
+
+While the Elves get to work printing the correctly-ordered updates, you have a little time to fix the rest of them.
+
+For each of the incorrectly-ordered updates, use the page ordering rules to put the page numbers in the right order. For the above example, here are the three incorrectly-ordered updates and their correct orderings:
+
+    75,97,47,61,53 becomes 97,75,47,61,53.
+    61,13,29 becomes 61,29,13.
+    97,13,75,29,47 becomes 97,75,47,29,13.
+
+After taking only the incorrectly-ordered updates and ordering them correctly, their middle page numbers are 47, 29, and 47. Adding these together produces 123.
+
+Find the updates which are not in the correct order. What do you get if you add up the middle page numbers after correctly ordering just those updates?
+
 */
 
 const handler = require("./utils");
 const file = "./data/5.txt";
 const separator = "|";
+
+const storeRules = (line, rules) => {
+  const [first, second] = line.split(separator);
+  if (rules[first]) {
+    rules[first].push(second);
+  } else {
+    rules[first] = [second];
+  }
+};
+
+const calculateFinalValue = (updates) =>
+  updates.reduce(
+    (acc, current) => acc + parseInt(current[Math.floor(current.length / 2)]),
+    0
+  );
 
 const partOne = () => {
   const validUpdates = [];
@@ -89,38 +119,67 @@ const partOne = () => {
   let total = 0;
   handler.handleFile(file, (line) => {
     if (line.includes(separator)) {
-      const [first, second] = line.split(separator);
-      if (rules[first]) {
-        rules[first].push(second);
-      } else {
-        rules[first] = [second];
-      }
+      storeRules(line, rules);
     } else {
       let valid = true;
-      const update = line;
-      const numbers = update.split(",");
+      const numbers = line.split(",");
       for (let i = 0; i < numbers.length; i++) {
+        if (i === 0) {
+          continue;
+        }
         const number = numbers[i];
-        const numberRules = rules[number] ?? [];
-        // FIRST?
-        // OTHER
-        // LAST
-        if (false) {
-          valid = false;
-          break;
+        for (let j = 0; j < i; j++) {
+          const prevNumber = numbers[j];
+          if (rules[number]?.includes(prevNumber)) {
+            valid = false;
+            break;
+          }
         }
       }
       if (valid) {
-        validUpdates.push(update);
+        validUpdates.push([...line.split(",")]);
       }
     }
   });
-  console.log("START");
-
-  console.log("END");
+  total = calculateFinalValue(validUpdates);
+  console.log(total);
 };
 
-const partTwo = () => {};
+const partTwo = () => {
+  const invalidUpdates = [];
+  const rules = {};
+  let total = 0;
+  handler.handleFile(file, (line) => {
+    if (line.includes(separator)) {
+      storeRules(line, rules);
+    } else {
+      let valid = true;
+      const numbers = line.split(",");
+      for (let i = 0; i < numbers.length; i++) {
+        if (i === 0) {
+          continue;
+        }
+        const number = numbers[i];
+        for (let j = 0; j < i; j++) {
+          const prevNumber = numbers[j];
+          if (rules[number]?.includes(prevNumber)) {
+            valid = false;
+            break;
+          }
+        }
+      }
+      if (!valid) {
+        invalidUpdates.push([...line.split(",")]);
+      }
+    }
+  });
+  const invalidUpdatesMadeValid = invalidUpdates.map((update) => {
+    update.sort((a, b) => (rules[a]?.includes(b) ? 1 : -1));
+    return update;
+  });
+  total = calculateFinalValue(invalidUpdatesMadeValid);
+  console.log(total);
+};
 
 partOne();
 partTwo();
