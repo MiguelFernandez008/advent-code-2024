@@ -9,7 +9,7 @@
       body {
         width: 100%;
         height: 100%;
-        overflow: hidden;
+        overflow-x: hidden;
       }
       canvas {
         display: block;
@@ -20,9 +20,18 @@
   </head>
   <body>
     <h1>Advent of code 2024 day 6 part 1</h1>
+    <p id="positions">Guard different possitions: <span>0</span></p>
+    <button type="button" id="start">Start</button>
+    <button type="button" id="stop">Stop</button>
     <canvas id="playground" width="780" height="780"></canvas>
     <script>
       window.onload = init;
+      let guardDifferentPositions = 0;
+      const textOutput = document
+        .getElementById("positions")
+        .querySelector("span");
+      const startButton = document.getElementById("start");
+      const stopButton = document.getElementById("stop");
       const tileSize = 6;
       const FPS = 60;
       const interval = 1000 / FPS;
@@ -52,7 +61,7 @@
             case directions.TOP:
               newPos = this.y - this.speed;
               if (newPos < 0) {
-                running = false
+                running = false;
                 break;
               }
               isCollision = this.checkObstacle(this.x, newPos);
@@ -65,7 +74,7 @@
             case directions.BOTTOM:
               newPos = this.y + this.speed;
               if (newPos >= map.yDistance) {
-                running = false
+                running = false;
                 break;
               }
               isCollision = this.checkObstacle(this.x, newPos);
@@ -78,7 +87,7 @@
             case directions.LEFT:
               newPos = this.x - this.speed;
               if (newPos < 0) {
-                running = false
+                running = false;
                 break;
               }
               isCollision = this.checkObstacle(newPos, this.y);
@@ -91,7 +100,7 @@
             case directions.RIGHT:
               newPos = this.x + this.speed;
               if (newPos >= map.xDistance) {
-                running = false
+                running = false;
                 break;
               }
               isCollision = this.checkObstacle(newPos, this.y);
@@ -120,7 +129,7 @@
       };
       let canvas;
       let context;
-      let running = true
+      let running = false;
       let gameID;
       let delta = 0;
       let currentTime = 0;
@@ -160,6 +169,14 @@
         }
       }
 
+      startButton.addEventListener("click", function () {
+        running = true;
+      });
+
+      stopButton.addEventListener("click", function () {
+        running = false;
+      });
+
       function init() {
         (async function () {
           canvas = document.getElementById("playground");
@@ -183,6 +200,7 @@
         currentTime = new Date().getTime();
         delta = currentTime - lasTime;
         if (delta > interval) {
+          textOutput.textContent = guardDifferentPositions.toString();
           context.fillStyle = "black";
           context.fillRect(0, 0, canvas.width, canvas.height);
           for (let i = 0; i < canvas.height; i += tileSize) {
@@ -194,13 +212,13 @@
               context.fillRect(j, i, tileSize, tileSize);
             }
           }
-          map[player.y][player.x] = visited;
-          player.update(delta);
-          map[player.y][player.x] = player.sprite;
+          if (running) {
+            map[player.y][player.x] = visited;
+            guardDifferentPositions++;
+            player.update(delta);
+            map[player.y][player.x] = player.sprite;
+          }
           lasTime = currentTime - (delta % interval);
-        }
-        if (!running) {
-          cancelAnimationFrame(gameID);
         }
       }
     </script>
