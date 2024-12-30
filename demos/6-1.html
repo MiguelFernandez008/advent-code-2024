@@ -3,29 +3,35 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
     <title>Advent of code 2024 day 6 part 1</title>
-    <style>
-      html,
-      body {
-        width: 100%;
-        height: 100%;
-        overflow-x: hidden;
-      }
-      canvas {
-        display: block;
-        margin: 0 auto;
-        border: 1px solid black;
-      }
-    </style>
+    <link rel="stylesheet" href="../css/app.css" />
   </head>
   <body>
-    <h1>Advent of code 2024 day 6 part 1</h1>
-    <p id="positions">Guard different possitions: <span>0</span></p>
-    <button type="button" id="start">Start</button>
-    <button type="button" id="stop">Stop</button>
-    <canvas id="playground" width="780" height="780"></canvas>
-    <script>
-      window.onload = init;
+    <div class="container">
+      <div class="left">
+        <h1>Advent of code 2024 day 6 part 1</h1>
+        <p id="positions">Guard different possitions: <span>0</span></p>
+        <div class="actions">
+          <button type="button" id="start">Start</button>
+          <button type="button" id="stop">Stop</button>
+        </div>
+      </div>
+      <div class="right">
+        <canvas id="playground" width="780" height="780"></canvas>
+      </div>
+    </div>
+    <script type="module">
+      import {
+        init,
+        gameLoop,
+        makeTextFileLineIterator,
+      } from "../utils/utils.js";
       let guardDifferentPositions = 0;
       const textOutput = document
         .getElementById("positions")
@@ -33,8 +39,6 @@
       const startButton = document.getElementById("start");
       const stopButton = document.getElementById("stop");
       const tileSize = 6;
-      const FPS = 60;
-      const interval = 1000 / FPS;
       const obstacle = "#";
       const visited = "X";
       const empty = ".";
@@ -57,6 +61,8 @@
           return map[y][x] === obstacle;
         },
         update: function (delta) {
+          let newPos = 0;
+          let isCollision = false;
           switch (this.direction) {
             case directions.TOP:
               newPos = this.y - this.speed;
@@ -127,47 +133,8 @@
           color: "blue",
         },
       };
-      let canvas;
-      let context;
       let running = false;
-      let gameID;
-      let delta = 0;
-      let currentTime = 0;
-      let lasTime = 0;
       let map = [];
-
-      async function* makeTextFileLineIterator(fileURL) {
-        const utf8Decoder = new TextDecoder("utf-8");
-        let response = await fetch(fileURL);
-        let reader = response.body.getReader();
-        let { value: chunk, done: readerDone } = await reader.read();
-        chunk = chunk ? utf8Decoder.decode(chunk, { stream: true }) : "";
-
-        let re = /\r\n|\n|\r/gm;
-        let startIndex = 0;
-
-        for (;;) {
-          let result = re.exec(chunk);
-          if (!result) {
-            if (readerDone) {
-              break;
-            }
-            let remainder = chunk.substr(startIndex);
-            ({ value: chunk, done: readerDone } = await reader.read());
-            chunk =
-              remainder +
-              (chunk ? utf8Decoder.decode(chunk, { stream: true }) : "");
-            startIndex = re.lastIndex = 0;
-            continue;
-          }
-          yield chunk.substring(startIndex, result.index);
-          startIndex = re.lastIndex;
-        }
-        if (startIndex < chunk.length) {
-          // last line didn't end in a newline char
-          yield chunk.substr(startIndex);
-        }
-      }
 
       startButton.addEventListener("click", function () {
         running = true;
@@ -177,29 +144,25 @@
         running = false;
       });
 
-      function init() {
-        (async function () {
-          canvas = document.getElementById("playground");
-          context = canvas.getContext("2d");
-          gameID = requestAnimationFrame(gameLoop);
-          let lineIndex = 0;
-          for await (let line of makeTextFileLineIterator("../data/6.txt")) {
-            const playerIndex = line.indexOf(player.sprite);
-            if (playerIndex !== -1) {
-              player.x = playerIndex;
-              player.y = lineIndex;
+      window.onload = function () {
+        init({
+          initCallback: async function (param) {
+            let lineIndex = 0;
+            for await (let line of makeTextFileLineIterator("../data/6.txt")) {
+              const playerIndex = line.indexOf(player.sprite);
+              if (playerIndex !== -1) {
+                player.x = playerIndex;
+                player.y = lineIndex;
+              }
+              lineIndex++;
+              map.push([...line.split("")]);
             }
-            lineIndex++;
-            map.push([...line.split("")]);
-          }
-        })();
-      }
+          },
+        });
+      };
 
-      function gameLoop() {
-        gameID = requestAnimationFrame(gameLoop);
-        currentTime = new Date().getTime();
-        delta = currentTime - lasTime;
-        if (delta > interval) {
+      gameLoop({
+        updateCallback: function (delta, context, canvas, gameID) {
           textOutput.textContent = guardDifferentPositions.toString();
           context.fillStyle = "black";
           context.fillRect(0, 0, canvas.width, canvas.height);
@@ -218,9 +181,8 @@
             player.update(delta);
             map[player.y][player.x] = player.sprite;
           }
-          lasTime = currentTime - (delta % interval);
-        }
-      }
+        },
+      });
     </script>
   </body>
 </html>
