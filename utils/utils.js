@@ -24,6 +24,19 @@ function gameLoop({ updateCallback }) {
   }
 }
 
+function gameInterval({ updateCallback }) {
+  const defaults = {
+    updateCallback:
+      typeof updateCallback === "function" ? updateCallback : noop,
+  };
+  const fn = function () {
+    defaults?.updateCallback(0, context, canvas, gameID);
+    clearTimeout(gameID);
+    setTimeout(fn, interval);
+  }
+  gameID = setTimeout(fn, interval);
+}
+
 function init({ container, initCallback }) {
   const defaults = {
     container: container ?? "playground",
@@ -32,7 +45,7 @@ function init({ container, initCallback }) {
   (async function () {
     canvas = document.getElementById(defaults.container);
     context = canvas.getContext("2d");
-    defaults.initCallback();
+    defaults.initCallback(context, canvas);
   })();
 }
 
@@ -68,4 +81,4 @@ async function* makeTextFileLineIterator(fileURL) {
   }
 }
 
-export { init, gameLoop, makeTextFileLineIterator, noop };
+export { init, gameLoop, gameInterval, makeTextFileLineIterator, noop };

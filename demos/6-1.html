@@ -20,24 +20,27 @@
         <div class="actions">
           <button type="button" id="start">Start</button>
           <button type="button" id="stop">Stop</button>
+          <button type="button" id="restart">Restart</button>
         </div>
       </div>
       <div class="right">
-        <canvas id="playground" width="780" height="780"></canvas>
+        <canvas id="playground" ></canvas>
       </div>
     </div>
     <script type="module">
       import {
         init,
         gameLoop,
+        gameInterval,
         makeTextFileLineIterator,
       } from "../utils/utils.js";
-      let guardDifferentPositions = 0;
+      let guardDifferentPositions = 1;
       const textOutput = document
         .getElementById("positions")
         .querySelector("span");
       const startButton = document.getElementById("start");
       const stopButton = document.getElementById("stop");
+      const restartButton = document.getElementById("restart");
       const tileSize = 6;
       const obstacle = "#";
       const visited = "X";
@@ -60,7 +63,7 @@
         checkObstacle: function (x, y) {
           return map[y][x] === obstacle;
         },
-        update: function (delta) {
+        update: function (delta, canvas) {
           let newPos = 0;
           let isCollision = false;
           switch (this.direction) {
@@ -79,7 +82,7 @@
               break;
             case directions.BOTTOM:
               newPos = this.y + this.speed;
-              if (newPos >= map.yDistance) {
+              if (newPos >= canvas.height) {
                 running = false;
                 break;
               }
@@ -105,7 +108,7 @@
               break;
             case directions.RIGHT:
               newPos = this.x + this.speed;
-              if (newPos >= map.xDistance) {
+              if (newPos >= canvas.width) {
                 running = false;
                 break;
               }
@@ -144,9 +147,13 @@
         running = false;
       });
 
+      restartButton.addEventListener("click", function () {
+        window.location.reload();
+      });
+
       window.onload = function () {
         init({
-          initCallback: async function (param) {
+          initCallback: async function (context, canvas) {
             let lineIndex = 0;
             for await (let line of makeTextFileLineIterator("../data/6.txt")) {
               const playerIndex = line.indexOf(player.sprite);
@@ -157,12 +164,15 @@
               lineIndex++;
               map.push([...line.split("")]);
             }
+            canvas.width = lineIndex * tileSize;
+            canvas.height = lineIndex * tileSize;
           },
         });
       };
 
       gameLoop({
         updateCallback: function (delta, context, canvas, gameID) {
+          if (!context) return;
           textOutput.textContent = guardDifferentPositions.toString();
           context.fillStyle = "black";
           context.fillRect(0, 0, canvas.width, canvas.height);
@@ -170,15 +180,19 @@
             for (let j = 0; j < canvas.width; j += tileSize) {
               const originalIndexHeight = i / tileSize;
               const originalIndexWidth = j / tileSize;
-              const item = map[originalIndexWidth][originalIndexHeight];
-              context.fillStyle = tileset[item]?.color ?? "gray";
-              context.fillRect(j, i, tileSize, tileSize);
+              if (map[originalIndexWidth]) {
+                const item = map[originalIndexHeight][originalIndexWidth];
+                context.fillStyle = tileset[item]?.color ?? "gray";
+                context.fillRect(j, i, tileSize, tileSize);
+              }
             }
           }
           if (running) {
             map[player.y][player.x] = visited;
-            guardDifferentPositions++;
-            player.update(delta);
+            player.update(delta, canvas);
+            if(map[player.y][player.x] !== visited) {
+              guardDifferentPositions++;
+            }            
             map[player.y][player.x] = player.sprite;
           }
         },
